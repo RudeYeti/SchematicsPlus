@@ -1,0 +1,9 @@
+# SchematicsPlus plugin created by Rude Yeti, Incorporated.
+# A simple plugin which syncs schematics posted in a Discord Channel to a Minecraft Server.
+# This depends on DiscordSRV and WorldEdit. Both are requirements for this plugin to work.
+
+# General Configuration
+
+# The ID of the Discord Channel which will have schematics posted in it.
+# Default value: "##################"
+channel-id: "##################"
