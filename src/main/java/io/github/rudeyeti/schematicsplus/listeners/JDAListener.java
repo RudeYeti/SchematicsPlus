@@ -30,10 +30,10 @@ public class JDAListener extends ListenerAdapter {
                 URL url = new URL(event.getMessage().getContentRaw());
                 String downloadFile = Schematic.download(url, schematicsFolder);
 
-                if (downloadFile.startsWith("Usage:")) {
-                    Schematic.errorMessage(event, downloadFile);
-                } else {
+                if (!downloadFile.startsWith("Usage:")) {
                     event.getChannel().sendMessage(downloadFile).queue();
+                } else {
+                    Schematic.errorMessage(event, downloadFile);
                 }
             } catch (MalformedURLException error) {
                 List<Message.Attachment> attachments = event.getMessage().getAttachments();
@@ -46,8 +46,12 @@ public class JDAListener extends ListenerAdapter {
                         File file = new File(schematicsFolder, fileName);
 
                         if (!file.exists()) {
-                            attachments.get(0).downloadToFile(file);
-                            event.getChannel().sendMessage(Schematic.message(2, fileName)).queue();
+                            if (!(attachments.get(0).getSize() > Config.sizeLimit)) {
+                                attachments.get(0).downloadToFile(file);
+                                event.getChannel().sendMessage(Schematic.message(3, fileName)).queue();
+                            } else {
+                                Schematic.errorMessage(event, Schematic.message(2, fileName));
+                            }
                         } else {
                             Schematic.errorMessage(event, Schematic.message(1, fileName));
                         }

@@ -1,6 +1,7 @@
 package io.github.rudeyeti.schematicsplus;
 
 import github.scarsz.discordsrv.dependencies.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +20,8 @@ public class Schematic {
             case 1:
                 return "Usage: The schematic `" + fileName + "` already exists.";
             case 2:
+                return "Usage: The schematic `" + fileName + "` exceeds the file size limit of `" + Config.sizeLimit / 1000000 + " MB`.";
+            case 3:
                 return "The schematic `" + fileName + "` has been successfully uploaded.";
         }
         return null;
@@ -42,12 +45,21 @@ public class Schematic {
 
                     ReadableByteChannel readableByteChannel = Channels.newChannel(connection.getInputStream());
                     FileOutputStream fileOutputStream = new FileOutputStream(file);
+                    int fileSize = IOUtils.toByteArray(connection.getInputStream()).length;
+
+                    if (fileSize > Config.sizeLimit) {
+                        readableByteChannel.close();
+                        fileOutputStream.close();
+                        file.delete();
+
+                        return message(2, fileName);
+                    }
 
                     fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
                     readableByteChannel.close();
                     fileOutputStream.close();
 
-                    return message(2, fileName);
+                    return message(3, fileName);
                 } catch (IOException error) {
                     error.printStackTrace();
                 }
